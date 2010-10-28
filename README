@@ -1,0 +1,111 @@
+-----Ruby/SerialPort-----
+
+-- Description --
+
+Ruby/IButton is a Ruby library that provides a module for using
+the Dallas/Maxim one-wire public domain API.
+
+-- Installation --
+
+$ cd owpd300
+$ make
+$ cd .. 
+$ ruby extconf.rb
+$ make
+$ make install
+
+-- Testing --
+
+* test/enumerate.rb
+
+Enumerate devices on the interface
+
+-- API --
+
+  **** module OneWire ****
+
+   *** class Port **
+
+    ** Class methods **
+
+      * new(dev) -> Port
+
+      	dev is a device name suitable for the Dallas/Maxim API,
+	e.g. COM1 or /dev/ttyS0
+
+    ** Instance methods **
+
+      * close() -> nil
+
+      	The device connection is closed
+
+      *	enumerate -> Array
+
+        Enumerate OneWire devices on this Port, returning an array of
+        OneWire::Device. This is a physical enumerate; we probably should
+        cache it in the devices property as the test program does.
+
+   *** class Device **
+
+    ** Class methods **
+
+      * new(port, serial) -> Device
+
+        Associate a OneWire Device having the specified serial number with
+        this port.  Care is needed with serial numbers; each is a String
+        containing eight binary bytes.  Called internally by Port.enumerate()
+
+    ** Instance methods **
+
+      * name() -> String
+
+      	The first byte of thes erial number contains the device type.
+	This is used to look up a table in the Dallas API, returning a
+	device type name.
+
+      * describe() -> String
+
+      	Returns a multi-line string containing a description of the device type
+
+      * banks() -> Integer
+
+      	Returns an array of the names of any memory banks this device has,
+	for example, Scratchpad.
+
+      * bankPages(bankNum) -> Integer
+
+      	For the specified bank, return the number of memory pages
+
+      * readPage(bankNum, pageNum) -> String or Array
+
+      	Read a page from a bank. If the page contains extra information,
+	as ScratchPad pages do, the return value is an array of two elements
+	[ data, extra ].  Otherwise the return is a string containing the
+	page data.
+
+      * writeBlock(bankNum, address, data)
+
+      	Write the data bytes into the bank starting at the byte offset address.
+
+      * setRTC(seconds)
+
+      	Set the Device's Real Time Clock running from the given count.
+	Dallas commonly use Unix time (seconds since midnight on 1/1/1970),
+	but you might prefer to use 1/1/2000. The device doesn't care.
+	An exception will be thrown if the Device has no RTC.
+
+      * getRTC()
+
+      	Get the seconds counter from the Device's Real Time Clock.
+	An exception will be thrown if the Device has no RTC.
+
+      * stopRTC()
+
+      	Stop the Device's Real Time Clock counter.
+	An exception will be thrown if the Device has no RTC.
+
+-- License --
+
+BSD
+
+Clifford Heath <cjh@polyplex.org>
